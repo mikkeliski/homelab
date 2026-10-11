@@ -1,6 +1,8 @@
 # Homelab
 
-A self-hosted server running on an old ThinkPad, built to practise Linux administration and server hardening. The first service it will host is a Minecraft server in Docker.
+A self-hosted server running on an old ThinkPad, built to practise Linux administration and server hardening.
+
+This repo covers the host itself: how it is installed, secured and accessed. Each service running on it has its own repo (see [Services](#services)).
 
 This README is a running log of what I set up and why.
 
@@ -51,7 +53,8 @@ sudo ufw allow 22/tcp
 sudo ufw enable
 ```
 
-- Why: nothing is reachable from the network unless I have added a rule for it.
+- Why: services running on the host are not reachable from the network unless I have added a rule for them.
+- Limitation: Docker writes its own firewall rules for published container ports, and these are evaluated before ufw's. A port published by a container is reachable even if ufw would deny it. I control container exposure through which ports are published and which address they bind to (see [Docker](#7-docker)).
 
 ### 5. Remote access
 
@@ -63,13 +66,38 @@ sudo ufw enable
 - Verified by connecting from a mobile hotspot and  from my school campus instead of my home Wi-Fi.
 - Restricted SSH in ufw to the Tailscale interface only and removed the general port 22 rule, so devices on my home network can no longer reach SSH either.
 
+### 6. Users and access
+
+Other people who need a shell on the server get their own account. Nobody shares an account or a key.
+
+- Each account is created without a password, so it can only be used with an SSH key.
+- Accounts are not in the `sudo` group. Only my own user can administer the system.
+- Network access is given by sharing the machine with their Tailscale account, so they can reach this server and nothing else of mine.
+- The steps are scripted in [`scripts/add-user.sh`](scripts/add-user.sh):
+
+- To remove access: `sudo deluser --remove-home <username>`, and stop sharing the machine in Tailscale.
+- Why: separate accounts mean least privilege per person, a record of who did what, and that one person's access can be removed without affecting anyone else.
+
+### 7. Docker
+
+- Installed Docker Engine and the Compose plugin from Docker's official apt repository, following the official instructions for Debian.
+  - The repository is tied to Docker's signing key with a `Signed-By` line, so apt only accepts packages signed by that key. See [`configs/apt/docker.sources`](configs/apt/docker.sources).
+- Verified with `sudo docker run hello-world`.
+- No users are in the `docker` group. Docker commands are run with `sudo`.
+  - Why: membership in the `docker` group is effectively root on the host, which matters when other people have accounts.
+- Container ports are only published when they need to be reachable, and admin ports are bound to `127.0.0.1` or not published at all.
+
+## Services
+
+| Service | Repo |
+|---|---|
+| Minecraft server (Docker) | [mikkeliski/secure-mc](https://github.com/mikkeliski/secure-mc) |
+
 ## Planned
 
-- [ ] Install Docker
-- [ ] Run a Minecraft server in a container
 - [ ] Automatic security updates
-- [ ] Backups of the Minecraft world data
-- [ ] Website to manage whitelists etc for the Minecraft server.
+- [ ] Put container ports under ufw's control (ufw-docker or the `DOCKER-USER` chain)
+- [ ] Script the whole host setup so it can be reproduced on a fresh install
 
 ## Config files
 
@@ -77,4 +105,14 @@ sudo ufw enable
 configs/
   logind/lid.conf        -> /etc/systemd/logind.conf.d/lid.conf
   ssh/hardening.conf     -> /etc/ssh/sshd_config.d/hardening.conf
+  apt/docker.sources     -> /etc/apt/sources.list.d/docker.sources
+scripts/
+  add-user.sh            Create a key-only account without sudo rights
 ```
+
+## What I learned
+
+- Pasting several `sudo` commands at once can lose the later ones: the password prompt discards the input that was pasted after it. Running `sudo -v` first avoids this.
+- `Permission denied (publickey)` with the right username means the key offered by the client does not match the one on the server. Comparing fingerprints with `ssh-keygen -lf` on both sides finds it faster than comparing the keys by eye.
+- WSL has its own home folder and `~/.ssh`, separate from the Windows side, so a key made in one is not used by the other.
+- `su` asks for the target account's password, not mine. With root disabled and key-only accounts, `sudo -i` and `sudo -u <user> -i` are the way to switch user.
