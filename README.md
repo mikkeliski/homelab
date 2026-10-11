@@ -12,7 +12,7 @@ This README is a running log of what I set up and why.
 | OS | Debian stable, installed headless (no desktop environment) |
 | Hostname | `homelab` |
 | Network | Wi-Fi (the laptop has no standard Ethernet port) |
-| Access | SSH from my main laptop |
+| Access | SSH over Tailscale, key-only |
 
 ## What I have done so far
 
@@ -53,11 +53,20 @@ sudo ufw enable
 
 - Why: nothing is reachable from the network unless I have added a rule for it.
 
+### 5. Remote access
+
+- Installed Tailscale on the server and on my laptop, which puts both on a private WireGuard-based network.
+- I can now SSH to the server from any network using its Tailscale address, with the same key-only login as before.
+  - Why: no ports are forwarded on my home router, so SSH is not exposed to the internet at all. Only devices signed in to my Tailscale network can reach it.
+- Disabled key expiry for the server in the Tailscale admin console so it does not drop off the network unattended. Expiry stays on for my laptop.
+- Added a host entry in `~/.ssh/config` on my laptop, so `ssh homelab` connects without typing the address.
+- Verified by connecting from a mobile hotspot and  from my school campus instead of my home Wi-Fi.
+- Restricted SSH in ufw to the Tailscale interface only and removed the general port 22 rule, so devices on my home network can no longer reach SSH either.
+
 ## Planned
 
 - [ ] Install Docker
 - [ ] Run a Minecraft server in a container
-- [ ] Remote access from outside my home network through a VPN (Tailscale or WireGuard) instead of exposing SSH to the internet
 - [ ] Automatic security updates
 - [ ] Backups of the Minecraft world data
 - [ ] Website to manage whitelists etc for the Minecraft server.
