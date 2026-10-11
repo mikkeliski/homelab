@@ -1,1 +1,16 @@
+# Secrets: never commit these
+.env
+*.key
+*.pem
+id_*
+!*.pub
+
+# Local notes and scratch files
+notes-private/
+*.log
+
+# Backups and archives
+backups/
+*.tar.gz
+*.zip
 
