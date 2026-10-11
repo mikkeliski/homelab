@@ -20,7 +20,7 @@ This README is a running log of what I set up and why.
 
 ### 1. Installation
 
-- I wrote the Debian netinst image to a USB stick with Rufus in DD image mode, so the stick is an exact copy of the official image.
+- Wrote the Debian netinst image to a USB stick with Rufus in DD image mode, so the stick is an exact copy of the official image.
 - Installed with only **SSH server** and **standard system utilities** selected. No desktop environment.
   - Why: a GUI idles at over 1 GB of RAM that the server can use instead, and fewer installed packages means a smaller attack surface and less to patch.
 - Left the root password empty during install. This disables direct root login and gives my own user `sudo` rights.
@@ -53,8 +53,10 @@ sudo ufw allow 22/tcp
 sudo ufw enable
 ```
 
+
 - Why: services running on the host are not reachable from the network unless I have added a rule for them.
 - Limitation: Docker writes its own firewall rules for published container ports, and these are evaluated before ufw's. A port published by a container is reachable even if ufw would deny it. I control container exposure through which ports are published and which address they bind to (see [Docker](#7-docker)).
+- The port 22 rule was later narrowed to the Tailscale interface only (see [Remote access](#5-remote-access)).
 
 ### 5. Remote access
 
@@ -63,7 +65,7 @@ sudo ufw enable
   - Why: no ports are forwarded on my home router, so SSH is not exposed to the internet at all. Only devices signed in to my Tailscale network can reach it.
 - Disabled key expiry for the server in the Tailscale admin console so it does not drop off the network unattended. Expiry stays on for my laptop.
 - Added a host entry in `~/.ssh/config` on my laptop, so `ssh homelab` connects without typing the address.
-- Verified by connecting from a mobile hotspot and  from my school campus instead of my home Wi-Fi.
+- Verified by connecting from a mobile hotspot and from my school campus instead of my home Wi-Fi.
 - Restricted SSH in ufw to the Tailscale interface only and removed the general port 22 rule, so devices on my home network can no longer reach SSH either.
 
 ### 6. Users and access
@@ -74,7 +76,9 @@ Other people who need a shell on the server get their own account. Nobody shares
 - Accounts are not in the `sudo` group. Only my own user can administer the system.
 - Network access is given by sharing the machine with their Tailscale account, so they can reach this server and nothing else of mine.
 - The steps are scripted in [`scripts/add-user.sh`](scripts/add-user.sh):
-
+```
+sudo bash scripts/add-user.sh <username> '<their public key line>'
+```
 - To remove access: `sudo deluser --remove-home <username>`, and stop sharing the machine in Tailscale.
 - Why: separate accounts mean least privilege per person, a record of who did what, and that one person's access can be removed without affecting anyone else.
 
