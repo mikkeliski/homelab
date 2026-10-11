@@ -60,7 +60,7 @@ sudo ufw enable
 - [ ] Remote access from outside my home network through a VPN (Tailscale or WireGuard) instead of exposing SSH to the internet
 - [ ] Automatic security updates
 - [ ] Backups of the Minecraft world data
-- [ ] Website to manage witelists etc for the Minecraft server.
+- [ ] Website to manage whitelists etc for the Minecraft server.
 
 ## Config files
 
