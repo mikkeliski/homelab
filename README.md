@@ -36,7 +36,7 @@ This README is a running log of what I set up and why.
 ### 3. SSH hardening
 
 - Added my ed25519 public key to `~/.ssh/authorized_keys` on the server.
-- Disabled password authentication and root login over SSH with a drop-in config. See [`configs/ssh/hardening.conf`](configs/ssh/hardening.conf).
+- Disabled password authentication and root login over SSH with a drop-in config. See [`configs/ssh/hardening.conf`](config/ssh/hardening.conf).
   - Why: a key cannot be guessed, while a password on an open SSH port is a constant target for brute-force attempts.
 - Verified the change:
   - `ssh user@host` logs in with the key.
