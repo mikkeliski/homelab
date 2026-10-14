@@ -85,7 +85,7 @@ sudo bash scripts/add-user.sh <username> '<their public key line>'
 ### 7. Docker
 
 - Installed Docker Engine and the Compose plugin from Docker's official apt repository, following the official instructions for Debian.
-  - The repository is tied to Docker's signing key with a `Signed-By` line, so apt only accepts packages signed by that key. See [`configs/apt/docker.sources`](configs/apt/docker.sources).
+  - The repository is tied to Docker's signing key with a `Signed-By` line, so apt only accepts packages signed by that key. See [`config/apt/docker.sources`](config/apt/docker.sources).
 - Verified with `sudo docker run hello-world`.
 - No users are in the `docker` group. Docker commands are run with `sudo`.
   - Why: membership in the `docker` group is effectively root on the host, which matters when other people have accounts.
@@ -106,7 +106,7 @@ sudo bash scripts/add-user.sh <username> '<their public key line>'
 ## Config files
 
 ```
-configs/
+config/
   logind/lid.conf        -> /etc/systemd/logind.conf.d/lid.conf
   ssh/hardening.conf     -> /etc/ssh/sshd_config.d/hardening.conf
   apt/docker.sources     -> /etc/apt/sources.list.d/docker.sources
