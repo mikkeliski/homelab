@@ -31,7 +31,7 @@ This README is a running log of what I set up and why.
 ### 2. Base configuration
 
 - Updated all packages: `sudo apt update && sudo apt full-upgrade`
-- Stopped the laptop suspending when the lid is closed, using a systemd-logind drop-in. See [`configs/logind/lid.conf`](configs/logind/lid.conf).
+- Stopped the laptop suspending when the lid is closed, using a systemd-logind drop-in. See [`config/logind/lid.conf`](configs/logind/lid.conf).
 
 ### 3. SSH hardening
 
